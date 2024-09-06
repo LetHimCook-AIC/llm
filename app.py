@@ -1,13 +1,15 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS 
 import joblib
 import json
-from interview_prep import answer_question
+from src.interview_prep import answer_question
 
 job_rec_model = joblib.load('model/job_rec_model.pkl')
 job_rec_mlb = joblib.load('model/job_rec_mlb_encoder.pkl')
 job_rec_list = joblib.load('model/job_rec_list.pkl')
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/job_rec', methods=['POST'])
 def job_rec():
@@ -25,7 +27,7 @@ def job_rec():
     unique_candidate_fields_list = list(unique_candidate_fields)
 
     if data:
-        return jsonify({'job recommendation': unique_candidate_fields_list[:3]}), 200
+        return jsonify({'job_recommendations': unique_candidate_fields_list[:3]}), 200
     else:
         return jsonify({"message": "No data received"}), 400
 
@@ -40,6 +42,12 @@ def interview_prep():
         return jsonify(answers), 200
     else:
         return jsonify({"message": "No data received"}), 400
+
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({'status': 'healthy'}), 200
+
 
 if __name__ == '__main__':
     app.run(debug=True)
